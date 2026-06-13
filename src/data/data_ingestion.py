@@ -72,8 +72,14 @@ def preprocess_data(df:pd.DataFrame)-> pd.DataFrame:
         # Removing duplicates
         df.drop_duplicates(inplace=True)
         # Removing rows with empty strings
+        print("******Before*****")
+        print(df.columns)
+        print(df.isnull().sum())
+        print("******After*****")
         df = df[df['clean_comment'].str.strip() != '']
-        
+        df = df.dropna(subset=['clean_comment'])
+        print(df.columns)
+        print(df.isnull().sum())
         logger.debug('Data preprocessing completed: Missing values, duplicates, and empty strings removed.')
         return df
     except KeyError as e:
