@@ -132,8 +132,7 @@ def main():
         train_data = load_data(os.path.join(root_dir,'data/interim/train_processed.csv'))
         train_data = train_data.dropna(subset=['clean_comment'])
 
-        print(train_data.columns)
-        print(train_data.isnull().sum())
+        
         # Apply TF-IDF feature engineering on training data
         X_train_tfidf,y_train = apply_tfidf(train_data,max_features,ngram_range)
 
