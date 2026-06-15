@@ -4,14 +4,14 @@ import pickle
 import logging 
 import yaml
 import mlflow
-import mlflow.sklearn
+# import mlflow.sklearn
 from sklearn.metrics import classification_report,confusion_matrix
-from sklearn.feature_extraction.tests import TfidfVectorizer 
+from sklearn.feature_extraction.text import TfidfVectorizer 
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import json
-from mlflow.models import infer_signature
+# from mlflow.models import infer_signature
 
 # logging configuration
 logger = logging.getLogger('model_evaluation')
@@ -87,7 +87,8 @@ def evaluate_model(model, X_test: np.ndarray, y_test: np.ndarray):
         y_pred = model.predict(X_test)
         report = classification_report(y_test, y_pred, output_dict=True)
         cm = confusion_matrix(y_test, y_pred)
-        
+        print(report)
+        print('====================================')
         logger.debug('Model evaluation completed')
 
         return report, cm
@@ -124,7 +125,25 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
         logger.debug('Model info saved to %s', file_path)
     except Exception as e:
         logger.error('Error occurred while saving the model info: %s', e)
- 
+def print_report(result:pd.DataFrame)->None:
+
+    print(f"{'Class':<10} {'Precision':<10} {'Recall':<10} {'F1-Score':<10} {'Support':<10}")
+    print("-" * 55)
+
+    for cls in ['-1', '0', '1']:
+        metrics = result[cls]
+        print(
+            f"{cls:<10} "
+            f"{metrics['precision']:<10.4f} "
+            f"{metrics['recall']:<10.4f} "
+            f"{metrics['f1-score']:<10.4f} "
+            f"{int(metrics['support']):<10}"
+        )
+
+    print("-" * 55)
+    print(f"Accuracy: {result['accuracy']:.4f}")
+    print(f"Macro Avg F1: {result['macro avg']['f1-score']:.4f}")
+    print(f"Weighted Avg F1: {result['weighted avg']['f1-score']:.4f}")
 def main():
 
     
@@ -147,7 +166,7 @@ def main():
         input_example = pd.DataFrame(X_test_tfidf.toarray()[:5], columns=vectorizer.get_feature_names_out())  # <--- Added for signature
 
         # Infer the signature
-        signature = infer_signature(input_example, model.predict(X_test_tfidf[:5]))  # <--- Added for signature
+        # signature = infer_signature(input_example, model.predict(X_test_tfidf[:5]))  # <--- Added for signature
 
           # Save model info
         model_path = "lgbm_model"
@@ -156,6 +175,9 @@ def main():
          # Evaluate model and get metrics
         report, cm = evaluate_model(model, X_test_tfidf, y_test)
          # Log confusion matrix
+        print_report(report)
+        # print(df.round(4))
+
         log_confusion_matrix(cm, "Test Data")
         
     except Exception as e:
