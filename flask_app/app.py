@@ -11,7 +11,11 @@ import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import matplotlib.dates as mdates
+import matplotlib
 
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 CORS(app)
@@ -80,7 +84,7 @@ def generate_trend_graph():
         sentiment_labels = {-1:'Negative',0:'Neutral',1:'Positive'}
 
         # Resample the data over monthly intervals and count sentiments
-        monthly_counts = df.resample('M')['sentiment'].value_counts().unstack(fill_value=0)
+        monthly_counts = df.resample('ME')['sentiment'].value_counts().unstack(fill_value=0)
 
         # Calculate total per month
         monthly_totals = monthly_counts.sum(axis=1)
@@ -143,7 +147,7 @@ def generate_trend_graph():
 @app.route('/generate_chart',methods=['POST'])
 def generate_chart():
     try:
-        data = request.get_json
+        data = request.get_json()
         sentiment_counts = data.get('sentiment_counts')
 
         if not sentiment_counts:
@@ -185,6 +189,7 @@ def generate_chart():
     except Exception as e:
         app.logger.error(f"Error in /generate_chart: {e}")
         return jsonify({"error": f"Chart generation failed: {str(e)}"}), 500
+@app.route('/generate_wordcloud',methods=['POST'])
 def generate_wordcloud():
     try:
         data = request.get_json()
